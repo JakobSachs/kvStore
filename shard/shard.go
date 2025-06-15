@@ -8,6 +8,7 @@ import (
 	"io"
 	"log/slog"
 	"net/http"
+	"net/http/pprof"
 	"os"
 	"sync"
 
@@ -118,6 +119,23 @@ func main() {
 	}
 	logger := slog.New(logHandler)
 	slog.SetDefault(logger)
+
+	if os.Getenv("PROFILE") == "1" {
+		slog.Info("Profiling enabled. Access /debug/pprof/")
+		// Register pprof handlers to the DefaultServeMux.
+		// http.HandleFunc already uses DefaultServeMux.
+		http.HandleFunc("/debug/pprof/", pprof.Index)
+		http.HandleFunc("/debug/pprof/cmdline", pprof.Cmdline)
+		http.HandleFunc("/debug/pprof/profile", pprof.Profile)
+		http.HandleFunc("/debug/pprof/symbol", pprof.Symbol)
+		http.HandleFunc("/debug/pprof/trace", pprof.Trace)
+		// You can add other pprof handlers as needed (e.g., for heap, goroutine, etc.)
+		// For example, to serve all standard pprof profiles:
+		// http.Handle("/debug/pprof/goroutine", pprof.Handler("goroutine"))
+		// http.Handle("/debug/pprof/heap", pprof.Handler("heap"))
+		// http.Handle("/debug/pprof/threadcreate", pprof.Handler("threadcreate"))
+		// http.Handle("/debug/pprof/block", pprof.Handler("block"))
+	}
 
 	store = make(map[string]string)
 	http.HandleFunc("/", handler)
