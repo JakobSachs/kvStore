@@ -81,7 +81,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		fmt.Printf("ERROR: failed to serve request: %v", err)
-		http.Error(w, "failed to read", 404)
+		http.Error(w, "failed to service request", 404)
 		return
 	}
 
