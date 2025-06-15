@@ -12,12 +12,7 @@ import (
 
 const SERVER_URL = "http://localhost:8080/request"
 
-func main() {
-	req := Request{
-		Type: NoOp,
-		Id:   1,
-	}
-
+func sendRequestToServer(req Request) {
 	jsonData, err := Serialize(req)
 	if err != nil {
 		log.Fatalf("Error marshalling request to JSON: %v", err)
@@ -36,7 +31,8 @@ func main() {
 	}
 	defer resp.Body.Close()
 
-	fmt.Printf("Sent NoOp Request: %s %s\n", httpReq.Method, httpReq.URL)
+	// Consider making the printing more generic or returning values if this is a library function
+	fmt.Printf("Sent Request (Type: %v, Id: %v): %s %s\n", req.Type, req.Id, httpReq.Method, httpReq.URL)
 	fmt.Printf("Response Status: %s\n", resp.Status)
 
 	responseBody, err := io.ReadAll(resp.Body)
@@ -44,4 +40,12 @@ func main() {
 		log.Fatalf("Error reading response body: %v", err)
 	}
 	fmt.Printf("Response Body: %s\n", string(responseBody))
+}
+
+func main() {
+	req := Request{
+		Type: NoOp,
+		Id:   1,
+	}
+	sendRequestToServer(req)
 }
