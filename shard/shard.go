@@ -122,8 +122,7 @@ func main() {
 
 	if os.Getenv("PROFILE") == "1" {
 		slog.Info("Profiling enabled. Access /debug/pprof/")
-		// Register pprof handlers to the DefaultServeMux.
-		// http.HandleFunc already uses DefaultServeMux.
+
 		http.HandleFunc("/debug/pprof/", pprof.Index)
 		http.HandleFunc("/debug/pprof/cmdline", pprof.Cmdline)
 		http.HandleFunc("/debug/pprof/profile", pprof.Profile)
