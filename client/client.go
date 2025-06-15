@@ -16,11 +16,11 @@ import (
 
 const (
 	keyLength      = 10
-	valueLength    = 100
-	testDuration   = 10 * time.Second
+	valueLength    = 1000
+	testDuration   = 20 * time.Second
 	numWorkers     = 50 // Concurrency level
 	serverURL      = "http://localhost:8080/"
-	readWriteRatio = 0.5 // 0.5 means 50% writes, 50% reads (for writes)
+	readWriteRatio = 0.25 // 0.5 means 50% writes, 50% reads (for writes)
 )
 
 var letterRunes = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
@@ -143,7 +143,7 @@ func main() {
 		fmt.Printf("Successful RPS: %.2f\n", successfulRps)
 
 		writeThroughput := float64(bytesWritten) / elapsedTime.Seconds() / 1024 // KB/s
-		readThroughput := float64(bytesRead) / elapsedTime.Seconds() / 1024   // KB/s
+		readThroughput := float64(bytesRead) / elapsedTime.Seconds() / 1024     // KB/s
 		fmt.Printf("Write Throughput: %.2f KB/s\n", writeThroughput)
 		fmt.Printf("Read Throughput: %.2f KB/s\n", readThroughput)
 	} else {
