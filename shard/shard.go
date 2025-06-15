@@ -5,9 +5,10 @@
 package main
 
 import (
-	"fmt"
 	"io"
+	"log/slog"
 	"net/http"
+	"os"
 	"sync"
 
 	. "jakobsachs.blog/kvStore/shared"
@@ -36,27 +37,29 @@ func writeHandler(r Request) (string, error) {
 // handles entire request parsing etc
 func handler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
-		http.Error(w, "ONLY POST ALLOWED", 404)
+		slog.Warn("Received non-POST request", "method", r.Method, "remote_addr", r.RemoteAddr)
+		http.Error(w, "ONLY POST ALLOWED", http.StatusMethodNotAllowed)
 		return
 	}
 
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
-		fmt.Printf("ERROR: failed to read request-body: %v\n", err)
-		http.Error(w, "failed to read request-body", 500)
+		slog.Error("Failed to read request body", "error", err, "remote_addr", r.RemoteAddr)
+		http.Error(w, "failed to read request-body", http.StatusInternalServerError)
 		return
 	}
-	fmt.Printf("Received raw request body: %s\n", body)
+	slog.Debug("Received raw request body", "body", string(body), "remote_addr", r.RemoteAddr)
 
 	req, err := Deserialize(body)
 	if err != nil {
-		fmt.Printf("ERROR: failed to parse request: %v\n", err)
-		http.Error(w, "failed to parse request", 404)
+		slog.Error("Failed to parse request", "error", err, "raw_body", string(body), "remote_addr", r.RemoteAddr)
+		http.Error(w, "failed to parse request", http.StatusBadRequest)
 		return
 	}
-	fmt.Printf("Parsed request: %+v\n", req)
+	slog.Info("Parsed request", "request_id", req.Id, "request_type", req.Type, "key", req.Key, "remote_addr", r.RemoteAddr)
 
 	if req.Type == NoOp {
+		slog.Info("Handling NoOp request", "request_id", req.Id, "remote_addr", r.RemoteAddr)
 		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 		w.WriteHeader(200)
 		io.WriteString(w, "ping")
@@ -66,33 +69,40 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	// route READ
 	var resp string
 	if req.Type == Read {
+		slog.Info("Handling Read request", "request_id", req.Id, "key", req.Key, "remote_addr", r.RemoteAddr)
 		resp, err = readHandler(req)
 	} else if req.Type == Write {
+		slog.Info("Handling Write request", "request_id", req.Id, "key", req.Key, "value_length", len(req.Value), "remote_addr", r.RemoteAddr)
 		resp, err = writeHandler(req)
 	} else {
     // haxor ?
-		fmt.Println("ERROR: Unhandled request type")
-		http.Error(w, "invalid request type", 404)
+		slog.Error("Unhandled request type", "request_id", req.Id, "request_type", req.Type, "remote_addr", r.RemoteAddr)
+		http.Error(w, "invalid request type", http.StatusBadRequest)
+		return // Added return here to avoid further processing
 	}
 
 	if err != nil {
-		fmt.Printf("ERROR: failed to serve request: %v\n", err)
-		http.Error(w, "failed to service request", 404)
+		slog.Error("Failed to serve request", "error", err, "request_id", req.Id, "request_type", req.Type, "remote_addr", r.RemoteAddr)
+		http.Error(w, "failed to service request", http.StatusInternalServerError)
 		return
 	}
 
+	slog.Info("Successfully served request", "request_id", req.Id, "response_length", len(resp), "remote_addr", r.RemoteAddr)
 	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
-	w.WriteHeader(200)
+	w.WriteHeader(http.StatusOK)
 	io.WriteString(w, resp)
 
 }
 
 func main() {
+	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
+	slog.SetDefault(logger)
+
 	store = make(map[string]string)
 	http.HandleFunc("/", handler)
 
-	fmt.Println("Starting server on :8080")
+	slog.Info("Starting server", "address", ":8080")
 	if err := http.ListenAndServe(":8080", nil); err != nil {
-		fmt.Printf("Could not start server: %s\n", err)
+		slog.Error("Could not start server", "error", err)
 	}
 }
