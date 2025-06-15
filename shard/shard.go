@@ -26,7 +26,6 @@ func readHandler(r Request) (string, error) {
 	value, ok := store[r.Key]
 	if !ok {
 		slog.Debug("Key not found in store", "request_id", r.Id, "key", r.Key)
-		// Return empty string and no error, as per original behavior for non-existent keys
 		return "", nil
 	}
 	slog.Debug("Key found in store", "request_id", r.Id, "key", r.Key, "value_length", len(value))
@@ -76,7 +75,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// route READ
+	// route READ/WRITE
 	var resp string
 	if req.Type == Read {
 		slog.Info("Handling Read request", "request_id", req.Id, "key", req.Key, "remote_addr", r.RemoteAddr)
@@ -88,7 +87,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
     // haxor ?
 		slog.Error("Unhandled request type", "request_id", req.Id, "request_type", req.Type, "remote_addr", r.RemoteAddr)
 		http.Error(w, "invalid request type", http.StatusBadRequest)
-		return // Added return here to avoid further processing
+		return 
 	}
 
 	if err != nil {
@@ -121,7 +120,6 @@ func main() {
 	slog.SetDefault(logger)
 
 	store = make(map[string]string)
-	// The 'handler' below now correctly refers to your http handler function
 	http.HandleFunc("/", handler)
 
 	slog.Info("Starting server", "address", ":8080")
