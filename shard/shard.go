@@ -22,13 +22,12 @@ func readHandler(r Request) (string, error) {
 	storeMtx.Lock()
 	defer storeMtx.Unlock()
 
-  v,ok := store[*r.Key] 
-  if ok {
-    return v,nil
-  } else {
-    return "", nil
-  }
-
+	v, ok := store[*r.Key]
+	if ok {
+		return v, nil
+	} else {
+		return "", nil
+	}
 
 	return "", errors.New("not implemented")
 }
@@ -78,7 +77,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	} else {
 		fmt.Println("PANIC: how did i get here ???")
 		http.Error(w, "invalid request type", 404)
-  }
+	}
 
 	if err != nil {
 		fmt.Printf("ERROR: failed to serve request: %v", err)
