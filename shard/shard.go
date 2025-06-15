@@ -5,7 +5,6 @@
 package main
 
 import (
-	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -22,20 +21,16 @@ func readHandler(r Request) (string, error) {
 	storeMtx.Lock()
 	defer storeMtx.Unlock()
 
-	v, ok := store[r.Key]
-	if ok {
-		return v, nil
-	} else {
-		return "", nil
-	}
-
-	return "", errors.New("not implemented")
+	return store[r.Key], nil
 }
 
 func writeHandler(r Request) (string, error) {
 	storeMtx.Lock()
 	defer storeMtx.Unlock()
-	return "", errors.New("not implemented")
+
+	store[r.Key] = r.Value
+
+	return r.Value, nil
 }
 
 // handles entire request parsing etc
@@ -75,6 +70,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	} else if req.Type == Write {
 		resp, err = writeHandler(req)
 	} else {
+    // haxor ?
 		fmt.Println("ERROR: Unhandled request type")
 		http.Error(w, "invalid request type", 404)
 	}
