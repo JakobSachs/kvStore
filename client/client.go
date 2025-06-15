@@ -15,7 +15,7 @@ import (
 )
 
 const (
-	keyLength      = 10
+	keyLength      = 5
 	valueLength    = 1000
 	testDuration   = 20 * time.Second
 	numWorkers     = 50 // Concurrency level

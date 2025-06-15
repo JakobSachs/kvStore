@@ -85,10 +85,10 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		slog.Info("Handling Write request", "request_id", req.Id, "key", req.Key, "value_length", len(req.Value), "remote_addr", r.RemoteAddr)
 		resp, err = writeHandler(req)
 	} else {
-    // haxor ?
+		// haxor ?
 		slog.Error("Unhandled request type", "request_id", req.Id, "request_type", req.Type, "remote_addr", r.RemoteAddr)
 		http.Error(w, "invalid request type", http.StatusBadRequest)
-		return 
+		return
 	}
 
 	if err != nil {
@@ -122,14 +122,7 @@ func main() {
 
 	if os.Getenv("PROFILE") == "1" {
 		slog.Info("Profiling enabled. Access /debug/pprof/")
-		// Registering pprof.Index handles all subpaths like /debug/pprof/cmdline, /debug/pprof/profile, etc.
 		http.HandleFunc("/debug/pprof/", pprof.Index)
-		// The following specific handlers are automatically covered by pprof.Index
-		// and registering them separately causes a conflict.
-		// http.HandleFunc("/debug/pprof/cmdline", pprof.Cmdline)
-		// http.HandleFunc("/debug/pprof/profile", pprof.Profile)
-		// http.HandleFunc("/debug/pprof/symbol", pprof.Symbol)
-		// http.HandleFunc("/debug/pprof/trace", pprof.Trace)
 	}
 
 	store = make(map[string]string)
