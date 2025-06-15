@@ -19,17 +19,27 @@ var store map[string]string
 var storeMtx sync.Mutex
 
 func readHandler(r Request) (string, error) {
+	slog.Debug("Entering readHandler", "request_id", r.Id, "key", r.Key)
 	storeMtx.Lock()
 	defer storeMtx.Unlock()
 
-	return store[r.Key], nil
+	value, ok := store[r.Key]
+	if !ok {
+		slog.Debug("Key not found in store", "request_id", r.Id, "key", r.Key)
+		// Return empty string and no error, as per original behavior for non-existent keys
+		return "", nil
+	}
+	slog.Debug("Key found in store", "request_id", r.Id, "key", r.Key, "value_length", len(value))
+	return value, nil
 }
 
 func writeHandler(r Request) (string, error) {
+	slog.Debug("Entering writeHandler", "request_id", r.Id, "key", r.Key, "value_length", len(r.Value))
 	storeMtx.Lock()
 	defer storeMtx.Unlock()
 
 	store[r.Key] = r.Value
+	slog.Debug("Key successfully written to store", "request_id", r.Id, "key", r.Key, "value_length", len(r.Value))
 
 	return r.Value, nil
 }
