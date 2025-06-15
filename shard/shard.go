@@ -22,7 +22,7 @@ func readHandler(r Request) (string, error) {
 	storeMtx.Lock()
 	defer storeMtx.Unlock()
 
-	v, ok := store[*r.Key]
+	v, ok := store[r.Key]
 	if ok {
 		return v, nil
 	} else {

@@ -52,8 +52,8 @@ func (t *RequestType) unmarshalJSON(data []byte) error {
 type Request struct {
 	Type  RequestType `json:"type"`
 	Id    uint64      `json:"id"`
-	Key   *string     `json:"key,omitempty"`
-	Value *string     `json:"value,omitempty"`
+	Key   string      `json:"key,omitempty"`
+	Value string      `json:"value,omitempty"`
 }
 
 func Deserialize(data []byte) (Request, error) {
