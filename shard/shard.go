@@ -110,7 +110,14 @@ func main() {
 		logLevel = slog.LevelDebug
 	}
 
-	logger := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: logLevel}))
+	opts := &slog.HandlerOptions{Level: logLevel}
+	var handler slog.Handler
+	if os.Getenv("CLI") == "1" {
+		handler = slog.NewTextHandler(os.Stdout, opts)
+	} else {
+		handler = slog.NewJSONHandler(os.Stdout, opts)
+	}
+	logger := slog.New(handler)
 	slog.SetDefault(logger)
 
 	store = make(map[string]string)
