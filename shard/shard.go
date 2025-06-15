@@ -47,19 +47,19 @@ func handler(w http.ResponseWriter, r *http.Request) {
 
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
-		fmt.Println("ERROR: failed to read request-body: %v", err)
+		fmt.Printf("ERROR: failed to read request-body: %v\n", err)
 		http.Error(w, "failed to read request-body", 500)
 		return
 	}
-	fmt.Println(body)
+	fmt.Printf("Received raw request body: %s\n", body)
 
 	req, err := Deserialize(body)
 	if err != nil {
-		fmt.Println("ERROR: failed to parse request: %v", err)
+		fmt.Printf("ERROR: failed to parse request: %v\n", err)
 		http.Error(w, "failed to parse request", 404)
 		return
 	}
-	fmt.Println(req)
+	fmt.Printf("Parsed request: %+v\n", req)
 
 	if req.Type == NoOp {
 		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
@@ -75,12 +75,12 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	} else if req.Type == Write {
 		resp, err = writeHandler(req)
 	} else {
-		fmt.Println("PANIC: how did i get here ???")
+		fmt.Println("ERROR: Unhandled request type")
 		http.Error(w, "invalid request type", 404)
 	}
 
 	if err != nil {
-		fmt.Printf("ERROR: failed to serve request: %v", err)
+		fmt.Printf("ERROR: failed to serve request: %v\n", err)
 		http.Error(w, "failed to service request", 404)
 		return
 	}
@@ -97,6 +97,6 @@ func main() {
 
 	fmt.Println("Starting server on :8080")
 	if err := http.ListenAndServe(":8080", nil); err != nil {
-		fmt.Println("Could not start server: %s\n", err)
+		fmt.Printf("Could not start server: %s\n", err)
 	}
 }
