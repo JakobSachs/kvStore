@@ -105,7 +105,12 @@ func handler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
+	logLevel := slog.LevelInfo
+	if os.Getenv("DEBUG") == "1" {
+		logLevel = slog.LevelDebug
+	}
+
+	logger := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: logLevel}))
 	slog.SetDefault(logger)
 
 	store = make(map[string]string)
