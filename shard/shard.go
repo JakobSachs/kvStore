@@ -111,16 +111,17 @@ func main() {
 	}
 
 	opts := &slog.HandlerOptions{Level: logLevel}
-	var handler slog.Handler
+	var logHandler slog.Handler
 	if os.Getenv("CLI") == "1" {
-		handler = slog.NewTextHandler(os.Stdout, opts)
+		logHandler = slog.NewTextHandler(os.Stdout, opts)
 	} else {
-		handler = slog.NewJSONHandler(os.Stdout, opts)
+		logHandler = slog.NewJSONHandler(os.Stdout, opts)
 	}
-	logger := slog.New(handler)
+	logger := slog.New(logHandler)
 	slog.SetDefault(logger)
 
 	store = make(map[string]string)
+	// The 'handler' below now correctly refers to your http handler function
 	http.HandleFunc("/", handler)
 
 	slog.Info("Starting server", "address", ":8080")
