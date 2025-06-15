@@ -122,18 +122,14 @@ func main() {
 
 	if os.Getenv("PROFILE") == "1" {
 		slog.Info("Profiling enabled. Access /debug/pprof/")
-
+		// Registering pprof.Index handles all subpaths like /debug/pprof/cmdline, /debug/pprof/profile, etc.
 		http.HandleFunc("/debug/pprof/", pprof.Index)
-		http.HandleFunc("/debug/pprof/cmdline", pprof.Cmdline)
-		http.HandleFunc("/debug/pprof/profile", pprof.Profile)
-		http.HandleFunc("/debug/pprof/symbol", pprof.Symbol)
-		http.HandleFunc("/debug/pprof/trace", pprof.Trace)
-		// You can add other pprof handlers as needed (e.g., for heap, goroutine, etc.)
-		// For example, to serve all standard pprof profiles:
-		// http.Handle("/debug/pprof/goroutine", pprof.Handler("goroutine"))
-		// http.Handle("/debug/pprof/heap", pprof.Handler("heap"))
-		// http.Handle("/debug/pprof/threadcreate", pprof.Handler("threadcreate"))
-		// http.Handle("/debug/pprof/block", pprof.Handler("block"))
+		// The following specific handlers are automatically covered by pprof.Index
+		// and registering them separately causes a conflict.
+		// http.HandleFunc("/debug/pprof/cmdline", pprof.Cmdline)
+		// http.HandleFunc("/debug/pprof/profile", pprof.Profile)
+		// http.HandleFunc("/debug/pprof/symbol", pprof.Symbol)
+		// http.HandleFunc("/debug/pprof/trace", pprof.Trace)
 	}
 
 	store = make(map[string]string)
