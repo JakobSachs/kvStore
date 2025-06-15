@@ -48,4 +48,18 @@ func main() {
 		Id:   1,
 	}
 	sendRequestToServer(req)
+
+  req.Type = Write
+  req.Id += 1
+  req.Key = "Beep boop"
+  req.Value = "boop beep ?"
+	sendRequestToServer(req)
+
+  req.Type = Read
+  req.Id += 1
+  req.Key = "Beep boop"
+  req.Value = ""
+	sendRequestToServer(req)
+
+
 }
